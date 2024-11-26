@@ -8,24 +8,24 @@ import (
 )
 
 type CPU struct {
-	ctx    context.Context
-	cancel context.CancelFunc
-	RegA   types.IRegister
-    Clock  types.ICircuit
-    Cfg    *Config
+	ctx       context.Context
+	cancel    context.CancelFunc
+	registers []types.IRegister
+	Clock     types.ICircuit
+	Cfg       *Config
 }
 
 type Config struct {
-    ClockFreq int
+	ClockFreq int
 }
 
 func (it *CPU) Setup() {
 	logw.Debug("^wh03.Setup")
 	defer logw.Debug("$wh03.Setup")
-	it.RegA = regA
-    it.Clock = &types.Clock{
-        Freq: it.Cfg.ClockFreq,
-    }
+	it.registers = []types.IRegister{regA, regB, regC, output1, output2, acc, flags, mar}
+	it.Clock = &types.Clock{
+		Freq: it.Cfg.ClockFreq,
+	}
 	it.ctx, it.cancel = context.WithCancel(context.Background())
 }
 
@@ -35,8 +35,10 @@ func (it *CPU) Run() {
 
 	it.Setup()
 
-    go it.Clock.Run(it.ctx)
-	go it.RegA.Run(it.ctx)
+	go it.Clock.Run(it.ctx)
+    for _, register := range it.registers {
+        go register.Run(it.ctx)
+    }
 	it.run()
 }
 
@@ -55,4 +57,3 @@ func (it *CPU) Stop() {
 	defer logw.Debug("$wh03.Stop")
 	it.cancel()
 }
-
