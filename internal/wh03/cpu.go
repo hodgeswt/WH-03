@@ -11,7 +11,8 @@ type CPU struct {
 	ctx       context.Context
 	cancel    context.CancelFunc
 	registers []types.IRegister
-	Clock     types.ICircuit
+	clock     types.ICircuit
+	prgc      types.ICircuit
 	Cfg       *Config
 }
 
@@ -22,10 +23,24 @@ type Config struct {
 func (it *CPU) Setup() {
 	logw.Debug("^wh03.Setup")
 	defer logw.Debug("$wh03.Setup")
-	it.registers = []types.IRegister{regA, regB, regC, output1, output2, acc, flags, mar}
-	it.Clock = &types.Clock{
+	it.registers = []types.IRegister{
+		regA,
+		regB,
+		regC,
+		output1,
+		output2,
+		acc,
+		flags,
+		mar,
+		instr,
+	}
+
+	it.clock = &types.Clock{
 		Freq: it.Cfg.ClockFreq,
 	}
+
+	it.prgc = &types.ProgramCounter{}
+
 	it.ctx, it.cancel = context.WithCancel(context.Background())
 }
 
@@ -35,10 +50,13 @@ func (it *CPU) Run() {
 
 	it.Setup()
 
-	go it.Clock.Run(it.ctx)
+	go it.clock.Run(it.ctx)
+    go it.prgc.Run(it.ctx)
+
 	for _, register := range it.registers {
 		go register.Run(it.ctx)
 	}
+
 	it.run()
 }
 
@@ -52,10 +70,10 @@ func (it *CPU) run() {
 		{
 			"A_OE": "1",
 		},
-        {
-            "D": "11111111",
-        },
-    }
+		{
+			"D": "11111111",
+		},
+	}
 	i := 0
 	for {
 		select {

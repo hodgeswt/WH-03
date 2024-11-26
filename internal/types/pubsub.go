@@ -41,8 +41,8 @@ func (it *PubSub) Publish(topic string, msg string) error {
 }
 
 func (it *PubSub) Subscribe(topic string) <-chan string {
-	logw.Debugf("^PubSub.Subscribe - topic: %s", topic)
-	defer logw.Debugf("$PubSub.Subcribe")
+	logw.Infof("^PubSub.Subscribe - topic: %s", topic)
+	defer logw.Infof("$PubSub.Subcribe")
 
 	it.mu.Lock()
 	defer it.mu.Unlock()

@@ -81,12 +81,6 @@ func RegisterUpdateStateDef(it *Register) {
 	logw.Debugf("^Register.RegisterUpdateStateDef - %s", it.Name)
 	defer logw.Debugf("$Register.RegisterUpdateStateDef - %s", it.Name)
 
-	if it.Name == "A" {
-		logw.Infof("%s - %v", it.Name, it.buffer)
-		logw.Infof("%s - %v", it.Name, it.state)
-
-	}
-
 	if it.buffer["WE"] == "1" && it.buffer["D"] != "" {
 		it.state = it.buffer["D"]
 	}
