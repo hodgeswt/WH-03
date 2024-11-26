@@ -8,38 +8,45 @@ import (
 )
 
 type IRegister interface {
-    ICircuit
-    GetName() string
+	ICircuit
+	GetName() string
 	GetInputs() []string
 	GetOutputs() []string
+	Buffer(key string, data string)
+	UpdateState()
+	Reset()
 }
 
 type Register struct {
-	Name    string
-	Inputs  []string
-	Outputs []string
-	RunFunc     func(ctx context.Context, it IRegister)
-	running bool
+	Name            string
+	Inputs          []string
+	Outputs         []string
+	RunFunc         func(ctx context.Context, it *Register)
+	UpdateStateFunc func(it *Register)
+	ResetFunc       func(it *Register)
+	running         bool
+	buffer          map[string]string
+	state           string
 }
 
 func (it *Register) GetName() string {
-    logw.Debug("^$Register.GetName")
+	logw.Debug("^$Register.GetName")
 	return it.Name
 }
 
 func (it *Register) GetInputs() []string {
-    logw.Debug("^$Register.GetInputs")
+	logw.Debugf("^$Register.GetInputs - %s", it.Name)
 	return it.Inputs
 }
 
 func (it *Register) GetOutputs() []string {
-    logw.Debug("^$Register.GetOutputs")
+	logw.Debugf("^$Register.GetOutputs - %s", it.Name)
 	return it.Outputs
 }
 
 func (it *Register) Run(ctx context.Context) {
-    logw.Debug("^Register.Run")
-    defer logw.Debug("$Register.Run")
+	logw.Debugf("^Register.Run - %s", it.Name)
+	defer logw.Debugf("$Register.Run - %s", it.Name)
 
 	if it.running {
 		return
@@ -49,31 +56,76 @@ func (it *Register) Run(ctx context.Context) {
 	it.running = true
 }
 
-func RegisterRunDef(ctx context.Context, it IRegister) {
-    name := it.GetName()
-    logw.Debugf("^Register.RegisterRunDef: %s", name)
-    defer logw.Debugf("$Register.RegisterRunDef: %s", name)
+func (it *Register) UpdateState() {
+	logw.Debugf("^Register.UpdateState - %s", it.Name)
+	defer logw.Debugf("$Register.UpdateState - %s", it.Name)
 
-    oe := Broker.Subscribe(fmt.Sprintf("%s_OE", name))
-    we := Broker.Subscribe(fmt.Sprintf("%s_WE", name))
-    di := Broker.Subscribe("D")
-    clk := Broker.Subscribe("CLK")
-    rst := Broker.Subscribe("RST")
+	it.UpdateStateFunc(it)
+}
 
-    for {
-        select {
-        case <-ctx.Done():
-            return
-        case dat := <-oe:
-            logw.Infof("Register %s received OE update %s", name, dat)
-        case dat := <-we:
-            logw.Infof("Register %s received OE update %s", name, dat)
-        case dat := <-di:
-            logw.Infof("Register %s received D update %s", name, dat)
-        case dat := <-clk:
-            logw.Infof("Register %s received CLK update %s", name, dat)
-        case dat := <-rst:
-            logw.Infof("Register %s received RST update %s", name, dat)
-        }
-    }
+func (it *Register) Buffer(key string, data string) {
+	logw.Debugf("^$Register.Buffer - %s", it.Name)
+	it.buffer[key] = data
+}
+
+func (it *Register) Reset() {
+	logw.Debugf("^$Register.Reset - %s", it.Name)
+
+	it.ResetFunc(it)
+}
+
+func RegisterUpdateStateDef(it *Register) {
+	logw.Debugf("^Register.RegisterUpdateStateDef - %s", it.Name)
+	defer logw.Debugf("$Register.RegisterUpdateStateDef - %s", it.Name)
+
+	if it.buffer["WE"] == "1" && it.buffer["D"] != "" {
+		it.state = it.buffer["D"]
+	}
+
+	if it.buffer["OE"] == "1" && it.state != "" {
+		Broker.Publish("D", it.state)
+	}
+}
+
+func RegisterResetDef(it *Register) {
+	logw.Debugf("^$Register.RegisterResetDef: %s", it.Name)
+
+	clear(it.buffer)
+	it.state = "00000000"
+}
+
+func RegisterRunDef(ctx context.Context, it *Register) {
+	logw.Debugf("^Register.RegisterRunDef: %s", it.Name)
+	defer logw.Debugf("$Register.RegisterRunDef: %s", it.Name)
+
+	oe := Broker.Subscribe(fmt.Sprintf("%s_OE", it.Name))
+	we := Broker.Subscribe(fmt.Sprintf("%s_WE", it.Name))
+	d := Broker.Subscribe("D")
+	clk := Broker.Subscribe("CLK")
+	rst := Broker.Subscribe("RST")
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case dat := <-oe:
+			logw.Infof("Register %s received OE update %s", it.Name, dat)
+			it.Buffer("OE", dat)
+		case dat := <-we:
+			logw.Infof("Register %s received OE update %s", it.Name, dat)
+			it.Buffer("WE", dat)
+		case dat := <-d:
+			logw.Infof("Register %s received D update %s", it.Name, dat)
+			it.Buffer("D", dat)
+		case dat := <-clk:
+			logw.Infof("Register %s received CLK update %s", it.Name, dat)
+			if dat == "1" {
+				// Rising edge
+				it.UpdateState()
+			}
+		case dat := <-rst:
+			logw.Infof("Register %s received RST update %s", it.Name, dat)
+			it.Reset()
+		}
+	}
 }

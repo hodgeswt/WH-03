@@ -9,6 +9,8 @@ var regA types.IRegister = &types.Register{
 	Inputs:  []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs: []string{"DO"},
 	RunFunc: types.RegisterRunDef,
+	UpdateStateFunc: types.RegisterUpdateStateDef,
+	ResetFunc: types.RegisterResetDef,
 }
 
 var regB types.IRegister = &types.Register{
@@ -16,6 +18,8 @@ var regB types.IRegister = &types.Register{
 	Inputs:  []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs: []string{"DO"},
 	RunFunc: types.RegisterRunDef,
+	UpdateStateFunc: types.RegisterUpdateStateDef,
+	ResetFunc: types.RegisterResetDef,
 }
 
 var regC types.IRegister = &types.Register{
@@ -23,6 +27,8 @@ var regC types.IRegister = &types.Register{
 	Inputs:  []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs: []string{"DO"},
 	RunFunc: types.RegisterRunDef,
+	UpdateStateFunc: types.RegisterUpdateStateDef,
+	ResetFunc: types.RegisterResetDef,
 }
 
 var output1 types.IRegister = &types.Register{
@@ -30,6 +36,8 @@ var output1 types.IRegister = &types.Register{
 	Inputs:  []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs: []string{"DO"},
 	RunFunc: types.RegisterRunDef,
+	UpdateStateFunc: types.RegisterUpdateStateDef,
+	ResetFunc: types.RegisterResetDef,
 }
 
 var output2 types.IRegister = &types.Register{
@@ -37,6 +45,8 @@ var output2 types.IRegister = &types.Register{
 	Inputs:  []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs: []string{"DO"},
 	RunFunc: types.RegisterRunDef,
+	UpdateStateFunc: types.RegisterUpdateStateDef,
+	ResetFunc: types.RegisterResetDef,
 }
 
 var acc types.IRegister = &types.Register{
@@ -44,6 +54,8 @@ var acc types.IRegister = &types.Register{
 	Inputs:  []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs: []string{"DO"},
 	RunFunc: types.RegisterRunDef,
+	UpdateStateFunc: types.RegisterUpdateStateDef,
+	ResetFunc: types.RegisterResetDef,
 }
 
 var flags types.IRegister = &types.Register{
@@ -51,6 +63,8 @@ var flags types.IRegister = &types.Register{
 	Inputs:  []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs: []string{"DO"},
 	RunFunc: types.RegisterRunDef,
+	UpdateStateFunc: types.RegisterUpdateStateDef,
+	ResetFunc: types.RegisterResetDef,
 }
 
 var mar types.IRegister = &types.Register{
@@ -58,4 +72,6 @@ var mar types.IRegister = &types.Register{
 	Inputs:  []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs: []string{"DO"},
 	RunFunc: types.RegisterRunDef,
+	UpdateStateFunc: types.RegisterUpdateStateDef,
+	ResetFunc: types.RegisterResetDef,
 }
