@@ -21,20 +21,20 @@ func main() {
 
 	cpu := new(wh03.CPU)
 	content, err := os.ReadFile("config.json")
-    defaultConfig := &wh03.Config {
-        ClockFreq: 2,
-    }
+	defaultConfig := &wh03.Config{
+		ClockFreq: 2,
+	}
 	if err != nil {
 		logw.Warn("main.main - unable to find config.json. Using defaults.")
 		cpu.Cfg = defaultConfig
-    } else {
-        cfg := new(wh03.Config)
-        err := json.Unmarshal(content, &cfg)
-        if err != nil {
-            cpu.Cfg = defaultConfig
-        } else {
-            cpu.Cfg = cfg
-        }
+	} else {
+		cfg := new(wh03.Config)
+		err := json.Unmarshal(content, &cfg)
+		if err != nil {
+			cpu.Cfg = defaultConfig
+		} else {
+			cpu.Cfg = cfg
+		}
 	}
 
 	go handleSigint(sigint, cpu)

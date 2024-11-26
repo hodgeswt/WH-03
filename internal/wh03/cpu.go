@@ -51,7 +51,7 @@ func (it *CPU) Run() {
 	it.Setup()
 
 	go it.clock.Run(it.ctx)
-    go it.prgc.Run(it.ctx)
+	go it.prgc.Run(it.ctx)
 
 	for _, register := range it.registers {
 		go register.Run(it.ctx)

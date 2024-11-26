@@ -29,7 +29,7 @@ func (it *PubSub) Publish(topic string, msg string) error {
 	logw.Debug("PubSub.Publish - acquired mutex")
 	defer logw.Debug("PubSub.Publish - releasing mutex")
 
-    logw.Infof("PubSub.Publish - topic: %s, msg: %s", topic, msg)
+	logw.Infof("PubSub.Publish - topic: %s, msg: %s", topic, msg)
 
 	t := it.submap[topic]
 
