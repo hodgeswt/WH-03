@@ -35,8 +35,8 @@ func (it *CPU) Run() {
 
 	it.Setup()
 
-    it.Clock.Run(it.ctx)
-	it.RegA.Run(it.ctx)
+    go it.Clock.Run(it.ctx)
+	go it.RegA.Run(it.ctx)
 	it.run()
 }
 
