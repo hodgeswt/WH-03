@@ -25,8 +25,8 @@ type Register struct {
 	UpdateStateFunc func(it *Register)
 	ResetFunc       func(it *Register)
 	running         bool
-	buffer          map[string]string
-	state           string
+	InputBuffer     map[string]string
+	State           string
 }
 
 func (it *Register) GetName() string {
@@ -65,10 +65,10 @@ func (it *Register) UpdateState() {
 
 func (it *Register) Buffer(key string, data string) {
 	logw.Debugf("^$Register.Buffer - %s", it.Name)
-	if it.buffer == nil {
-		it.buffer = map[string]string{}
+	if it.InputBuffer == nil {
+		it.InputBuffer = map[string]string{}
 	}
-	it.buffer[key] = data
+	it.InputBuffer[key] = data
 }
 
 func (it *Register) Reset() {
@@ -81,22 +81,22 @@ func RegisterUpdateStateDef(it *Register) {
 	logw.Debugf("^Register.RegisterUpdateStateDef - %s", it.Name)
 	defer logw.Debugf("$Register.RegisterUpdateStateDef - %s", it.Name)
 
-	if it.buffer["WE"] == "1" && it.buffer["D"] != "" {
-		it.state = it.buffer["D"]
+	if it.InputBuffer["WE"] == "1" && it.InputBuffer["D"] != "" {
+		it.State = it.InputBuffer["D"]
 	}
 
-	if it.buffer["OE"] == "1" && it.state != "" {
-		Broker.Publish("D", it.state)
+	if it.InputBuffer["OE"] == "1" && it.State != "" {
+		Broker.Publish("D", it.State)
 	}
 
-	it.buffer = map[string]string{}
+	it.InputBuffer = map[string]string{}
 }
 
 func RegisterResetDef(it *Register) {
 	logw.Debugf("^$Register.RegisterResetDef: %s", it.Name)
 
-	clear(it.buffer)
-	it.state = "00000000"
+	clear(it.InputBuffer)
+	it.State = "00000000"
 }
 
 func RegisterRunDef(ctx context.Context, it *Register) {
@@ -108,6 +108,8 @@ func RegisterRunDef(ctx context.Context, it *Register) {
 	d := Broker.Subscribe("D")
 	clk := Broker.Subscribe("CLK")
 	rst := Broker.Subscribe("RST")
+
+    it.State = "00000000"
 
 	for {
 		select {
