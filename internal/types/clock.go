@@ -43,6 +43,3 @@ func toggle(int *int) {
 	}
 }
 
-func (it *Clock) Stop() {
-
-}
