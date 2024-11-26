@@ -65,6 +65,9 @@ func (it *Register) UpdateState() {
 
 func (it *Register) Buffer(key string, data string) {
 	logw.Debugf("^$Register.Buffer - %s", it.Name)
+	if it.buffer == nil {
+		it.buffer = map[string]string{}
+	}
 	it.buffer[key] = data
 }
 
@@ -78,6 +81,12 @@ func RegisterUpdateStateDef(it *Register) {
 	logw.Debugf("^Register.RegisterUpdateStateDef - %s", it.Name)
 	defer logw.Debugf("$Register.RegisterUpdateStateDef - %s", it.Name)
 
+	if it.Name == "A" {
+		logw.Infof("%s - %v", it.Name, it.buffer)
+		logw.Infof("%s - %v", it.Name, it.state)
+
+	}
+
 	if it.buffer["WE"] == "1" && it.buffer["D"] != "" {
 		it.state = it.buffer["D"]
 	}
@@ -85,6 +94,8 @@ func RegisterUpdateStateDef(it *Register) {
 	if it.buffer["OE"] == "1" && it.state != "" {
 		Broker.Publish("D", it.state)
 	}
+
+	it.buffer = map[string]string{}
 }
 
 func RegisterResetDef(it *Register) {
@@ -115,10 +126,8 @@ func RegisterRunDef(ctx context.Context, it *Register) {
 			logw.Infof("Register %s received OE update %s", it.Name, dat)
 			it.Buffer("WE", dat)
 		case dat := <-d:
-			logw.Infof("Register %s received D update %s", it.Name, dat)
 			it.Buffer("D", dat)
 		case dat := <-clk:
-			logw.Infof("Register %s received CLK update %s", it.Name, dat)
 			if dat == "1" {
 				// Rising edge
 				it.UpdateState()

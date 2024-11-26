@@ -16,7 +16,7 @@ type CPU struct {
 }
 
 type Config struct {
-	ClockFreq int
+	ClockFreq int `json:"clockFreq"`
 }
 
 func (it *CPU) Setup() {
@@ -36,18 +36,42 @@ func (it *CPU) Run() {
 	it.Setup()
 
 	go it.Clock.Run(it.ctx)
-    for _, register := range it.registers {
-        go register.Run(it.ctx)
-    }
+	for _, register := range it.registers {
+		go register.Run(it.ctx)
+	}
 	it.run()
 }
 
 func (it *CPU) run() {
+	clk := types.Broker.Subscribe("CLK")
+	d := []map[string]string{
+		{
+			"D":    "01010101",
+			"A_WE": "1",
+		},
+		{
+			"A_OE": "1",
+		},
+        {
+            "D": "11111111",
+        },
+    }
+	i := 0
 	for {
 		select {
 		case <-it.ctx.Done():
 			logw.Debug("wh03.run - context canceled")
 			return
+		case dat := <-clk:
+			if dat == "1" {
+				if i <= len(d)-1 {
+					inst := d[i]
+					i = i + 1
+					for k, v := range inst {
+						types.Broker.Publish(k, v)
+					}
+				}
+			}
 		}
 	}
 }
