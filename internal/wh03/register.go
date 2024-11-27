@@ -3,6 +3,7 @@ package wh03
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hodgeswt/utilw/pkg/logw"
 )
@@ -105,11 +106,18 @@ func RegisterRunDef(ctx context.Context, it *Register) {
 
 	oe := Broker.Subscribe(fmt.Sprintf("%s_OE", it.Name))
 	we := Broker.Subscribe(fmt.Sprintf("%s_WE", it.Name))
-	d := Broker.Subscribe("D")
+
+	var d <-chan string
+	if slices.Contains(it.Inputs, "Ram_D") {
+		d = Broker.Subscribe("Ram_D")
+	} else {
+        d = Broker.Subscribe("D")
+    }
+
 	clk := Broker.Subscribe("CLK")
 	rst := Broker.Subscribe("RST")
 
-    it.State = "00000000"
+	it.State = "00000000"
 
 	for {
 		select {

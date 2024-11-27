@@ -71,7 +71,7 @@ var mar IRegister = &Register{
 
 var instr IRegister = &Register{
 	Name:            "Instruction",
-	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
+	Inputs:          []string{"RST", "CLK", "Ram_D", "OE", "WE"},
 	Outputs:         []string{"DO"},
 	RunFunc:         RegisterRunDef,
 	UpdateStateFunc: RegisterUpdateStateDef,
