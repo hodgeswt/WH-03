@@ -13,6 +13,7 @@ type CPU struct {
 	registers []types.IRegister
 	clock     types.ICircuit
 	prgc      types.ICircuit
+    stepctr   types.IStepCounter
 	Cfg       *Config
 }
 
@@ -39,6 +40,8 @@ func (it *CPU) Setup() {
 		Freq: it.Cfg.ClockFreq,
 	}
 
+    it.stepctr = &types.StepCounter{Limit: 7}
+
 	it.prgc = &types.ProgramCounter{}
 
 	it.ctx, it.cancel = context.WithCancel(context.Background())
@@ -52,6 +55,7 @@ func (it *CPU) Run() {
 
 	go it.clock.Run(it.ctx)
 	go it.prgc.Run(it.ctx)
+    go it.stepctr.Run(it.ctx)
 
 	for _, register := range it.registers {
 		go register.Run(it.ctx)

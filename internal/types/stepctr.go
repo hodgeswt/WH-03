@@ -13,7 +13,7 @@ type IStepCounter interface {
 type StepCounter struct {
 	buffer map[string]string
 	state  int
-    limit  int
+    Limit  int
 }
 
 func (it *StepCounter) Run(ctx context.Context) {
@@ -64,7 +64,7 @@ func (it *StepCounter) UpdateState() {
 
     it.state = it.state + 1
 
-    if it.state >= it.limit {
+    if it.state >= it.Limit {
         it.state = 0
     }
 
