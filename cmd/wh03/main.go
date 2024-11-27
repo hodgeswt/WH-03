@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/hodgeswt/WH-03/internal/types"
 	"github.com/hodgeswt/WH-03/internal/wh03"
 	"github.com/hodgeswt/utilw/pkg/logw"
 )
@@ -17,7 +16,7 @@ func main() {
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, os.Interrupt)
 
-	types.Broker.Init(10)
+	wh03.Broker.Init(10)
 
 	cpu := new(wh03.CPU)
 	content, err := os.ReadFile("config.json")

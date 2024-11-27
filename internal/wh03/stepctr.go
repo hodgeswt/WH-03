@@ -1,4 +1,4 @@
-package types
+package wh03
 
 import (
 	"context"

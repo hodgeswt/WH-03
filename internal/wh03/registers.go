@@ -3,92 +3,91 @@ package wh03
 import (
 	"context"
 
-	"github.com/hodgeswt/WH-03/internal/types"
 	"github.com/hodgeswt/utilw/pkg/logw"
 )
 
-var regA types.IRegister = &types.Register{
+var regA IRegister = &Register{
 	Name:            "A",
 	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs:         []string{"DO"},
-	RunFunc:         types.RegisterRunDef,
-	UpdateStateFunc: types.RegisterUpdateStateDef,
-	ResetFunc:       types.RegisterResetDef,
+	RunFunc:         RegisterRunDef,
+	UpdateStateFunc: RegisterUpdateStateDef,
+	ResetFunc:       RegisterResetDef,
 }
 
-var regB types.IRegister = &types.Register{
+var regB IRegister = &Register{
 	Name:            "B",
 	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs:         []string{"DO"},
-	RunFunc:         types.RegisterRunDef,
-	UpdateStateFunc: types.RegisterUpdateStateDef,
-	ResetFunc:       types.RegisterResetDef,
+	RunFunc:         RegisterRunDef,
+	UpdateStateFunc: RegisterUpdateStateDef,
+	ResetFunc:       RegisterResetDef,
 }
 
-var regC types.IRegister = &types.Register{
+var regC IRegister = &Register{
 	Name:            "C",
 	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs:         []string{"DO"},
-	RunFunc:         types.RegisterRunDef,
-	UpdateStateFunc: types.RegisterUpdateStateDef,
-	ResetFunc:       types.RegisterResetDef,
+	RunFunc:         RegisterRunDef,
+	UpdateStateFunc: RegisterUpdateStateDef,
+	ResetFunc:       RegisterResetDef,
 }
 
-var output1 types.IRegister = &types.Register{
+var output1 IRegister = &Register{
 	Name:            "Output1",
 	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs:         []string{"DO"},
-	RunFunc:         types.RegisterRunDef,
-	UpdateStateFunc: types.RegisterUpdateStateDef,
-	ResetFunc:       types.RegisterResetDef,
+	RunFunc:         RegisterRunDef,
+	UpdateStateFunc: RegisterUpdateStateDef,
+	ResetFunc:       RegisterResetDef,
 }
 
-var output2 types.IRegister = &types.Register{
+var output2 IRegister = &Register{
 	Name:            "Output2",
 	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs:         []string{"DO"},
-	RunFunc:         types.RegisterRunDef,
-	UpdateStateFunc: types.RegisterUpdateStateDef,
-	ResetFunc:       types.RegisterResetDef,
+	RunFunc:         RegisterRunDef,
+	UpdateStateFunc: RegisterUpdateStateDef,
+	ResetFunc:       RegisterResetDef,
 }
 
-var acc types.IRegister = &types.Register{
+var acc IRegister = &Register{
 	Name:            "Accumulator",
 	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs:         []string{"DO"},
-	RunFunc:         types.RegisterRunDef,
-	UpdateStateFunc: types.RegisterUpdateStateDef,
-	ResetFunc:       types.RegisterResetDef,
+	RunFunc:         RegisterRunDef,
+	UpdateStateFunc: RegisterUpdateStateDef,
+	ResetFunc:       RegisterResetDef,
 }
 
-var mar types.IRegister = &types.Register{
+var mar IRegister = &Register{
 	Name:            "MemoryAddress",
 	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs:         []string{"DO"},
-	RunFunc:         types.RegisterRunDef,
-	UpdateStateFunc: types.RegisterUpdateStateDef,
-	ResetFunc:       types.RegisterResetDef,
+	RunFunc:         RegisterRunDef,
+	UpdateStateFunc: RegisterUpdateStateDef,
+	ResetFunc:       RegisterResetDef,
 }
 
-var instr types.IRegister = &types.Register{
+var instr IRegister = &Register{
 	Name:            "Instruction",
 	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs:         []string{"DO"},
-	RunFunc:         types.RegisterRunDef,
-	UpdateStateFunc: types.RegisterUpdateStateDef,
-	ResetFunc:       types.RegisterResetDef,
+	RunFunc:         RegisterRunDef,
+	UpdateStateFunc: RegisterUpdateStateDef,
+	ResetFunc:       RegisterResetDef,
 }
 
-var flags types.IRegister = &types.Register{
+var flags IRegister = &Register{
 	Name:            "Flags",
 	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs:         []string{"DO"},
 	RunFunc:         FlagsRegisterRun,
 	UpdateStateFunc: FlagsRegisterUpdateState,
-	ResetFunc:       types.RegisterResetDef,
+	ResetFunc:       RegisterResetDef,
 }
 
-func FlagsRegisterUpdateState(it *types.Register) {
+func FlagsRegisterUpdateState(it *Register) {
 	logw.Debugf("^registers.FlagsRegisterUpdateState - %s", it.Name)
 	defer logw.Debugf("$registers.FlagsRegisterUpdateState- %s", it.Name)
 
@@ -100,21 +99,21 @@ func FlagsRegisterUpdateState(it *types.Register) {
 		it.State = it.InputBuffer["FD"]
 	}
 
-	types.Broker.Publish("Flags_GT", string(it.State[0]))
-	types.Broker.Publish("Flags_EQ", string(it.State[1]))
-	types.Broker.Publish("Flags_LT", string(it.State[2]))
-	types.Broker.Publish("Flags_C", string(it.State[3]))
+	Broker.Publish("Flags_GT", string(it.State[0]))
+	Broker.Publish("Flags_EQ", string(it.State[1]))
+	Broker.Publish("Flags_LT", string(it.State[2]))
+	Broker.Publish("Flags_C", string(it.State[3]))
 
 	it.InputBuffer = map[string]string{}
 }
 
-func FlagsRegisterRun(ctx context.Context, it *types.Register) {
+func FlagsRegisterRun(ctx context.Context, it *Register) {
 	logw.Debugf("^registers.FlagsRegisterRun: %s", it.Name)
 	defer logw.Debugf("$registers.FlagsRegisterRun: %s", it.Name)
 
-	fd := types.Broker.Subscribe("FD")
-	clk := types.Broker.Subscribe("CLK")
-	rst := types.Broker.Subscribe("RST")
+	fd := Broker.Subscribe("FD")
+	clk := Broker.Subscribe("CLK")
+	rst := Broker.Subscribe("RST")
 
     it.State = "00000000"
 

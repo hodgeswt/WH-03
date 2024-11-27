@@ -1,7 +1,7 @@
 //go:build unit
 // +build unit
 
-package types
+package wh03
 
 import (
 	"context"

@@ -3,17 +3,16 @@ package wh03
 import (
 	"context"
 
-	"github.com/hodgeswt/WH-03/internal/types"
 	"github.com/hodgeswt/utilw/pkg/logw"
 )
 
 type CPU struct {
 	ctx       context.Context
 	cancel    context.CancelFunc
-	registers []types.IRegister
-	clock     types.ICircuit
-	prgc      types.ICircuit
-    stepctr   types.IStepCounter
+	registers []IRegister
+	clock     ICircuit
+	prgc      ICircuit
+    stepctr   IStepCounter
 	Cfg       *Config
 }
 
@@ -24,7 +23,7 @@ type Config struct {
 func (it *CPU) Setup() {
 	logw.Debug("^wh03.Setup")
 	defer logw.Debug("$wh03.Setup")
-	it.registers = []types.IRegister{
+	it.registers = []IRegister{
 		regA,
 		regB,
 		regC,
@@ -36,13 +35,13 @@ func (it *CPU) Setup() {
 		instr,
 	}
 
-	it.clock = &types.Clock{
+	it.clock = &Clock{
 		Freq: it.Cfg.ClockFreq,
 	}
 
-    it.stepctr = &types.StepCounter{Limit: 7}
+    it.stepctr = &StepCounter{Limit: 7}
 
-	it.prgc = &types.ProgramCounter{}
+	it.prgc = &ProgramCounter{}
 
 	it.ctx, it.cancel = context.WithCancel(context.Background())
 }
@@ -65,7 +64,7 @@ func (it *CPU) Run() {
 }
 
 func (it *CPU) run() {
-	clk := types.Broker.Subscribe("CLK")
+	clk := Broker.Subscribe("CLK")
 	d := []map[string]string{
 		{
 			"D":    "01010101",
@@ -90,7 +89,7 @@ func (it *CPU) run() {
 					inst := d[i]
 					i = i + 1
 					for k, v := range inst {
-						types.Broker.Publish(k, v)
+						Broker.Publish(k, v)
 					}
 				}
 			}
