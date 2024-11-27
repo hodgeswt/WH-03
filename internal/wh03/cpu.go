@@ -12,13 +12,9 @@ type CPU struct {
 	registers []IRegister
 	clock     ICircuit
 	prgc      ICircuit
-    stepctr   IStepCounter
-    ram       IRam
+	stepctr   IStepCounter
+	ram       IRam
 	Cfg       *Config
-}
-
-type Config struct {
-	ClockFreq int `json:"clockFreq"`
 }
 
 func (it *CPU) Setup() {
@@ -39,9 +35,9 @@ func (it *CPU) Setup() {
 	it.clock = &Clock{
 		Freq: it.Cfg.ClockFreq,
 	}
-    it.stepctr = &StepCounter{Limit: 7}
+	it.stepctr = &StepCounter{Limit: 7}
 	it.prgc = &ProgramCounter{}
-    it.ram = &Ram{Size: 32 * (2^10)}
+	it.ram = &Ram{Size: it.Cfg.RamK * (2 ^ 10)}
 
 	it.ctx, it.cancel = context.WithCancel(context.Background())
 }
@@ -54,8 +50,8 @@ func (it *CPU) Run() {
 
 	go it.clock.Run(it.ctx)
 	go it.prgc.Run(it.ctx)
-    go it.stepctr.Run(it.ctx)
-    go it.ram.Run(it.ctx)
+	go it.stepctr.Run(it.ctx)
+	go it.ram.Run(it.ctx)
 
 	for _, register := range it.registers {
 		go register.Run(it.ctx)

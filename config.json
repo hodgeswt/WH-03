@@ -1,3 +1,5 @@
 {
-    "clockFreq": 1
+    "clockFreq": 1,
+    "ramK": 32,
+    "logLevel": "ALL"
 }

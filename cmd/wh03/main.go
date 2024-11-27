@@ -10,6 +10,40 @@ import (
 )
 
 func main() {
+	content, err := os.ReadFile("config.json")
+	defaultConfig := &wh03.Config{
+		ClockFreq: 2,
+		RamK:      32,
+		LogLevel:  "ERROR",
+        LogFile:   "",
+	}
+
+	var cfg *wh03.Config
+	if err != nil {
+		logw.Warn("main.main - unable to find config.json. Using defaults.")
+		cfg = defaultConfig
+	} else {
+		loadedCfg := new(wh03.Config)
+		err := json.Unmarshal(content, &loadedCfg)
+		if err != nil {
+			cfg = defaultConfig
+		} else {
+			cfg = loadedCfg
+		}
+	}
+
+    logw.SetLogLevel(cfg.LogLevel)
+
+    if cfg.LogFile != "" {
+        file, err := logw.SetOutFile(cfg.LogFile)
+
+        if err != nil {
+            panic(err)
+        }
+
+        defer file.Close()
+    }
+
 	logw.Debug("^main.main")
 	defer logw.Debug("$main.main")
 
@@ -19,22 +53,7 @@ func main() {
 	wh03.Broker.Init(10)
 
 	cpu := new(wh03.CPU)
-	content, err := os.ReadFile("config.json")
-	defaultConfig := &wh03.Config{
-		ClockFreq: 2,
-	}
-	if err != nil {
-		logw.Warn("main.main - unable to find config.json. Using defaults.")
-		cpu.Cfg = defaultConfig
-	} else {
-		cfg := new(wh03.Config)
-		err := json.Unmarshal(content, &cfg)
-		if err != nil {
-			cpu.Cfg = defaultConfig
-		} else {
-			cpu.Cfg = cfg
-		}
-	}
+	cpu.Cfg = cfg
 
 	go handleSigint(sigint, cpu)
 	go cpu.Run()
