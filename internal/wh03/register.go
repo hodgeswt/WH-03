@@ -28,6 +28,7 @@ type Register struct {
 	running         bool
 	InputBuffer     map[string]int
 	State           int
+	OutToCustom     bool
 }
 
 func (it *Register) GetName() string {
@@ -90,6 +91,10 @@ func RegisterUpdateStateDef(it *Register) {
 		Broker.Publish("D", it.State)
 	}
 
+    if it.OutToCustom {
+        Broker.Publish(fmt.Sprintf("%s_D", it.Name), it.State)
+    }
+
 	it.InputBuffer = map[string]int{}
 }
 
@@ -125,7 +130,7 @@ func RegisterRunDef(ctx context.Context, it *Register) {
 			logw.Infof("Register %s received OE update %08b", it.Name, dat)
 			it.Buffer("OE", dat)
 		case dat := <-we:
-            logw.Infof("Register %s received OE update %08b", it.Name, dat)
+			logw.Infof("Register %s received OE update %08b", it.Name, dat)
 			it.Buffer("WE", dat)
 		case dat := <-d:
 			it.Buffer("D", dat)
