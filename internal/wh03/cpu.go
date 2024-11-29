@@ -17,6 +17,7 @@ type CPU struct {
 	ram       IRam
 	rom       IRom
 	ctrl      ICtrl
+	alu       IAlu
 	Cfg       *Config
 }
 
@@ -43,6 +44,7 @@ func (it *CPU) Setup() {
 	it.ram = &Ram{Size: it.Cfg.RamK * (2 ^ 10)}
 	it.rom = &Rom{Size: it.Cfg.RomK * (2 ^ 10)}
 	it.ctrl = &Ctrl{}
+	it.alu = &Alu{}
 
 	err := it.rom.Load(it.Cfg.RomFile)
 
@@ -65,6 +67,7 @@ func (it *CPU) Run() {
 	go it.stepctr.Run(it.ctx)
 	go it.ram.Run(it.ctx)
 	go it.ctrl.Run(it.ctx)
+	go it.alu.Run(it.ctx)
 
 	for _, register := range it.registers {
 		go register.Run(it.ctx)
@@ -77,16 +80,26 @@ func (it *CPU) run() {
 	clk := Broker.Subscribe("CLK")
 	d := []map[string]int{
 		{
-			"D":    15,
+			"D":    1,
 			"A_WE": 1,
 		},
 		{
-			"A_OE": 1,
+			"D":    1,
+			"B_WE": 1,
+		},
+		{
+			"Alu_OP": 1,
+		},
+		{
+			"Accumulator_WE": 1,
+		},
+		{
+			"Accumulator_OE": 1,
 		},
         {
-            "HLT": 1,
-        },
-    }
+			"HLT": 1,
+		},
+	}
 	i := 0
 	for {
 		select {

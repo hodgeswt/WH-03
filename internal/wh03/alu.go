@@ -106,10 +106,6 @@ func (it *Alu) UpdateState() {
 		panic(fmt.Sprintf("Unexpected ALU result from data: %08b, %08b, op: %08b", da, db, op))
 	}
 
-	if it.buffer["Accumulator_OE"] == 1 {
-		Broker.Publish("D", dat)
-	}
-
 	Broker.Publish("Alu_D", dat)
 
 	gt := 0
