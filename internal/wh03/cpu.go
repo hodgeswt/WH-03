@@ -16,6 +16,7 @@ type CPU struct {
 	stepctr   IStepCounter
 	ram       IRam
     rom       IRom
+    ctrl      ICtrl
 	Cfg       *Config
 }
 
@@ -41,6 +42,7 @@ func (it *CPU) Setup() {
 	it.prgc = &ProgramCounter{}
 	it.ram = &Ram{Size: it.Cfg.RamK * (2 ^ 10)}
     it.rom = &Rom{Size: it.Cfg.RomK * (2 ^ 10)}
+    it.ctrl = &Ctrl{}
 
     err := it.rom.Load(it.Cfg.RomFile)
 
@@ -62,6 +64,7 @@ func (it *CPU) Run() {
 	go it.prgc.Run(it.ctx)
 	go it.stepctr.Run(it.ctx)
 	go it.ram.Run(it.ctx)
+    go it.ctrl.Run(it.ctx)
 
 	for _, register := range it.registers {
 		go register.Run(it.ctx)
@@ -81,7 +84,7 @@ func (it *CPU) run() {
 			"A_OE": 1,
 		},
 		{
-			"D": 2,
+			"HLT": 1,
 		},
 	}
 	i := 0
