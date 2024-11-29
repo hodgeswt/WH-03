@@ -11,7 +11,7 @@ type IStepCounter interface {
 }
 
 type StepCounter struct {
-	buffer map[string]string
+	buffer map[string]int
 	state  int
     Limit  int
 }
@@ -32,27 +32,27 @@ func (it *StepCounter) Run(ctx context.Context) {
 			logw.Debugf("StepCounter.Run - context cancelled")
 			return
 		case dat := <-clk:
-			if dat == "0" {
+			if dat == 0 {
 				// Falling edge
 				it.UpdateState()
 			}
         case dat := <-stepRst:
-            logw.Infof("Step Counter received StepCounter_RST: %s", dat)
+            logw.Infof("Step Counter received StepCounter_RST: %08b", dat)
             it.Reset()
 		case dat := <-rst:
-			logw.Infof("Step Counter received RST update %s", dat)
+			logw.Infof("Step Counter received RST update %08b", dat)
 			it.Reset()
 		}
 	}
 
 }
 
-func (it *StepCounter) Buffer(key string, data string) {
+func (it *StepCounter) Buffer(key string, data int) {
 	logw.Debugf("^StepCounter.Buffer")
 	defer logw.Debugf("$StepCounter.Buffer")
 
 	if it.buffer == nil {
-		it.buffer = map[string]string{}
+		it.buffer = map[string]int{}
 	}
 
 	it.buffer[key] = data
@@ -68,6 +68,7 @@ func (it *StepCounter) UpdateState() {
         it.state = 0
     }
 
+    Broker.Publish("STPC", it.state)
 }
 
 func (it *StepCounter) Reset() {

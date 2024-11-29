@@ -16,6 +16,7 @@ func main() {
 		RamK:      32,
 		LogLevel:  "ERROR",
         LogFile:   "",
+        RomFile:   "rom.bin",
 	}
 
 	var cfg *wh03.Config

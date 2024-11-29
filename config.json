@@ -1,5 +1,7 @@
 {
     "clockFreq": 1,
     "ramK": 32,
-    "logLevel": "ALL"
+    "logLevel": "ALL",
+    "romK": 32,
+    "romFile": "rom.bin"
 }

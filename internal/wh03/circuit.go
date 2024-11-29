@@ -4,7 +4,7 @@ import "context"
 
 type ICircuit interface {
 	Run(ctx context.Context)
-	Buffer(key string, data string)
+	Buffer(key string, data int)
 	UpdateState()
 	Reset()
 }

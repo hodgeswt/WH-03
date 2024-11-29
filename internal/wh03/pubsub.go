@@ -7,21 +7,21 @@ import (
 )
 
 type IPubSub interface {
-	Publish(topic string, msg string) error
-	Subscribe(topic string) <-chan string
+	Publish(topic string, msg int) error
+	Subscribe(topic string) <-chan int
 	Close()
 	Init(bufferSize int)
 }
 
 type PubSub struct {
 	mu         sync.RWMutex
-	submap     map[string][]chan string
+	submap     map[string][]chan int
 	closed     bool
 	bufferSize int
 }
 
-func (it *PubSub) Publish(topic string, msg string) error {
-	logw.Debugf("^PubSub.Publish - topic: %s, msg: %s", topic, msg)
+func (it *PubSub) Publish(topic string, msg int) error {
+	logw.Debugf("^PubSub.Publish - topic: %s, msg: %08b", topic, msg)
 	defer logw.Debugf("$PubSub.Publish")
 
 	it.mu.RLock()
@@ -29,7 +29,7 @@ func (it *PubSub) Publish(topic string, msg string) error {
 	logw.Debug("PubSub.Publish - acquired mutex")
 	defer logw.Debug("PubSub.Publish - releasing mutex")
 
-	logw.Infof("PubSub.Publish - topic: %s, msg: %s", topic, msg)
+	logw.Infof("PubSub.Publish - topic: %s, msg: %08b", topic, msg)
 
 	t := it.submap[topic]
 
@@ -40,7 +40,7 @@ func (it *PubSub) Publish(topic string, msg string) error {
 	return nil
 }
 
-func (it *PubSub) Subscribe(topic string) <-chan string {
+func (it *PubSub) Subscribe(topic string) <-chan int {
 	logw.Infof("^PubSub.Subscribe - topic: %s", topic)
 	defer logw.Infof("$PubSub.Subcribe")
 
@@ -49,7 +49,7 @@ func (it *PubSub) Subscribe(topic string) <-chan string {
 	logw.Debug("PubSub.Subscribe - acquired mutex")
 	defer logw.Debug("PubSub.Subscribe - releasing mutex")
 
-	sub := make(chan string, it.bufferSize)
+	sub := make(chan int, it.bufferSize)
 	it.submap[topic] = append(it.submap[topic], sub)
 
 	return sub
@@ -78,7 +78,7 @@ func (it *PubSub) Close() {
 
 func (it *PubSub) Init(bufferSize int) {
 	logw.Debug("^$PubSub.Init")
-	it.submap = map[string][]chan string{}
+	it.submap = map[string][]chan int{}
 	it.bufferSize = bufferSize
 }
 
