@@ -25,6 +25,7 @@ func (it *Clock) Run(ctx context.Context) {
 			logw.Debugf("Clock.Run - context cancelled")
 			return
 		case dat := <-hlt:
+            logw.Debugf("Clock.Run - received HLT %d", dat)
 			it.halt = dat == 1
 		case <-time.After(freq * time.Second):
 			if !it.halt {

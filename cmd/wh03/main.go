@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"os/signal"
@@ -12,11 +13,12 @@ import (
 func main() {
 	content, err := os.ReadFile("config.json")
 	defaultConfig := &wh03.Config{
-		ClockFreq: 2,
-		RamK:      32,
-		LogLevel:  "ERROR",
-        LogFile:   "",
-        RomFile:   "rom.bin",
+		ClockFreq:    2,
+		RamK:         32,
+		LogLevel:     "ERROR",
+		LogFile:      "",
+		RomFile:      "rom.bin",
+		ProbeEnabled: false,
 	}
 
 	var cfg *wh03.Config
@@ -33,17 +35,17 @@ func main() {
 		}
 	}
 
-    logw.SetLogLevel(cfg.LogLevel)
+	logw.SetLogLevel(cfg.LogLevel)
 
-    if cfg.LogFile != "" {
-        file, err := logw.SetOutFile(cfg.LogFile)
+	if cfg.LogFile != "" {
+		file, err := logw.SetOutFile(cfg.LogFile)
 
-        if err != nil {
-            panic(err)
-        }
+		if err != nil {
+			panic(err)
+		}
 
-        defer file.Close()
-    }
+		defer file.Close()
+	}
 
 	logw.Debug("^main.main")
 	defer logw.Debug("$main.main")
@@ -51,12 +53,14 @@ func main() {
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, os.Interrupt)
 
-	wh03.Broker.Init(10)
+	wh03.Broker.Init(10, cfg.ProbeEnabled)
 
 	cpu := new(wh03.CPU)
 	cpu.Cfg = cfg
 
-	go handleSigint(sigint, cpu)
+    ctx, cancel := context.WithCancel(context.Background())
+	go handleSigint(sigint, cpu, cancel)
+    go wh03.Broker.Run(ctx)
 	go cpu.Run()
 
 	logw.Info("main.main - WH-03 Started")
@@ -65,12 +69,14 @@ func main() {
 	select {}
 }
 
-func handleSigint(sigint chan os.Signal, main *wh03.CPU) {
+func handleSigint(sigint chan os.Signal, main *wh03.CPU, cancel context.CancelFunc) {
 	_ = <-sigint
 
 	logw.Info("main.handleSigint - sigint received")
 
 	main.Stop()
+    cancel()
+    wh03.Broker.Close()
 
 	logw.Info("main.handleSigint - WH-03 Stopped")
 

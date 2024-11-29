@@ -15,8 +15,8 @@ type CPU struct {
 	prgc      ICircuit
 	stepctr   IStepCounter
 	ram       IRam
-    rom       IRom
-    ctrl      ICtrl
+	rom       IRom
+	ctrl      ICtrl
 	Cfg       *Config
 }
 
@@ -41,14 +41,14 @@ func (it *CPU) Setup() {
 	it.stepctr = &StepCounter{Limit: 8}
 	it.prgc = &ProgramCounter{}
 	it.ram = &Ram{Size: it.Cfg.RamK * (2 ^ 10)}
-    it.rom = &Rom{Size: it.Cfg.RomK * (2 ^ 10)}
-    it.ctrl = &Ctrl{}
+	it.rom = &Rom{Size: it.Cfg.RomK * (2 ^ 10)}
+	it.ctrl = &Ctrl{}
 
-    err := it.rom.Load(it.Cfg.RomFile)
+	err := it.rom.Load(it.Cfg.RomFile)
 
-    if err != nil {
-        panic(fmt.Sprintf("Unable to load ROM file at %s, err: %v", it.Cfg.RomFile, err))
-    }
+	if err != nil {
+		panic(fmt.Sprintf("Unable to load ROM file at %s, err: %v", it.Cfg.RomFile, err))
+	}
 
 	it.ctx, it.cancel = context.WithCancel(context.Background())
 }
@@ -59,12 +59,12 @@ func (it *CPU) Run() {
 
 	it.Setup()
 
-    go it.rom.Run(it.ctx)
+	go it.rom.Run(it.ctx)
 	go it.clock.Run(it.ctx)
 	go it.prgc.Run(it.ctx)
 	go it.stepctr.Run(it.ctx)
 	go it.ram.Run(it.ctx)
-    go it.ctrl.Run(it.ctx)
+	go it.ctrl.Run(it.ctx)
 
 	for _, register := range it.registers {
 		go register.Run(it.ctx)
@@ -83,10 +83,10 @@ func (it *CPU) run() {
 		{
 			"A_OE": 1,
 		},
-		{
-			"HLT": 1,
-		},
-	}
+        {
+            "HLT": 1,
+        },
+    }
 	i := 0
 	for {
 		select {
@@ -94,6 +94,7 @@ func (it *CPU) run() {
 			logw.Debug("wh03.run - context canceled")
 			return
 		case dat := <-clk:
+			logw.Errorf("CLK Dat: %d", dat)
 			if dat == 1 {
 				if i <= len(d)-1 {
 					inst := d[i]

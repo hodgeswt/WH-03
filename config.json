@@ -3,5 +3,6 @@
     "ramK": 32,
     "logLevel": "ALL",
     "romK": 32,
-    "romFile": "rom.bin"
+    "romFile": "rom.bin",
+    "probeEnabled": true
 }
