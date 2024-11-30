@@ -4,5 +4,6 @@
     "logLevel": "ALL",
     "romK": 32,
     "romFile": "rom.bin",
-    "probeEnabled": true
+    "probeEnabled": true,
+    "stackStart": "8000"
 }

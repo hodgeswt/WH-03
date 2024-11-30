@@ -8,4 +8,5 @@ type Config struct {
 	RomK         int    `json:"romK"`
 	RomFile      string `json:"romFile"`
 	ProbeEnabled bool   `json:"probeEnabled"`
+	StackStart   string    `json:"stackStart"`
 }

@@ -19,6 +19,7 @@ func main() {
 		LogFile:      "",
 		RomFile:      "rom.bin",
 		ProbeEnabled: false,
+        StackStart:   "8000",
 	}
 
 	var cfg *wh03.Config

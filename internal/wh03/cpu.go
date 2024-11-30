@@ -3,6 +3,7 @@ package wh03
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/hodgeswt/utilw/pkg/logw"
 )
@@ -18,6 +19,7 @@ type CPU struct {
 	rom       IRom
 	ctrl      ICtrl
 	alu       IAlu
+    stack     IStack
 	Cfg       *Config
 }
 
@@ -46,7 +48,13 @@ func (it *CPU) Setup() {
 	it.ctrl = &Ctrl{}
 	it.alu = &Alu{}
 
-	err := it.rom.Load(it.Cfg.RomFile)
+    size, err := strconv.ParseInt(it.Cfg.StackStart, 16, 64)
+    if err != nil {
+        panic(fmt.Sprintf("Invalid hex value provided for stack start: %s", it.Cfg.StackStart))
+    }
+    it.stack = &Stack{StackStart: int(size)}
+
+	err = it.rom.Load(it.Cfg.RomFile)
 
 	if err != nil {
 		panic(fmt.Sprintf("Unable to load ROM file at %s, err: %v", it.Cfg.RomFile, err))
@@ -68,6 +76,7 @@ func (it *CPU) Run() {
 	go it.ram.Run(it.ctx)
 	go it.ctrl.Run(it.ctx)
 	go it.alu.Run(it.ctx)
+    go it.stack.Run(it.ctx)
 
 	for _, register := range it.registers {
 		go register.Run(it.ctx)
