@@ -69,7 +69,7 @@ var mar IRegister = &Register{
 	Inputs:          []string{"RST", "CLK", "D", "OE", "WE"},
 	Outputs:         []string{"DO"},
 	RunFunc:         RegisterRunDef,
-	UpdateStateFunc: RegisterUpdateStateDef,
+	UpdateStateFunc: MemoryAddressUpdateState,
 	ResetFunc:       RegisterResetDef,
 }
 
@@ -90,6 +90,24 @@ var flags IRegister = &Register{
 	UpdateStateFunc: FlagsRegisterUpdateState,
 	ResetFunc:       RegisterResetDef,
 }
+
+func MemoryAddressUpdateState(it *Register) {
+	logw.Debugf("^registers.MemoryAddressUpdateState - %s", it.Name)
+	defer logw.Debugf("$registers.MemoryAddressUpdateState - %s", it.Name)
+
+	if it.InputBuffer["WE"] == 1 {
+		it.State = it.InputBuffer["D"]
+	}
+
+	if it.InputBuffer["OE"] == 1 {
+		Broker.Publish("D", it.State)
+	}
+
+	Broker.Publish("Mar_D", it.State)
+
+	it.InputBuffer = map[string]int{}
+}
+
 
 func InstRegisterUpdateState(it *Register) {
 	logw.Debugf("^registers.InstRegisterUpdateState - %s", it.Name)

@@ -13,7 +13,7 @@ type IRam interface {
 type Ram struct {
 	Size   int
 	buffer map[string]int
-	data   map[int]int
+	data   []int
 }
 
 func (it *Ram) Buffer(key string, data int) {
@@ -36,9 +36,9 @@ func (it *Ram) Run(ctx context.Context) {
 	d := Broker.Subscribe("D")
 	clk := Broker.Subscribe("CLK")
 	rst := Broker.Subscribe("RST")
-	memAdd := Broker.Subscribe("MEM_ADD")
+	memAdd := Broker.Subscribe("Mar_D")
 
-	it.data = map[int]int{}
+	it.data = []int{}
 
 	for {
 		select {
@@ -53,7 +53,7 @@ func (it *Ram) Run(ctx context.Context) {
 		case dat := <-d:
 			it.Buffer("D", dat)
 		case dat := <-memAdd:
-			it.Buffer("MEM_ADD", dat)
+			it.Buffer("Mar_D", dat)
 		case dat := <-clk:
 			if dat == 0 {
 				// Falling edge
@@ -69,7 +69,7 @@ func (it *Ram) Run(ctx context.Context) {
 func (it *Ram) Reset() {
 	logw.Debug("^$Ram.Reset()")
 	it.buffer = map[string]int{}
-	it.data = map[int]int{}
+	it.data = []int{}
 }
 
 func (it *Ram) UpdateState() {
@@ -77,7 +77,7 @@ func (it *Ram) UpdateState() {
 	defer logw.Debug("$Ram.UpdateState")
 
 	if it.buffer["WE"] == 1 {
-		it.data[it.buffer["MEM_ADD"]] = it.buffer["D"]
+		it.data[it.buffer["Mar_D"]] = it.buffer["D"]
 	}
 
 	toOut := it.data[it.buffer["MEM_ADD"]]
@@ -86,8 +86,6 @@ func (it *Ram) UpdateState() {
 		Broker.Publish("D", toOut)
 	}
 
-    Broker.Publish("Ram_D", toOut)
+	Broker.Publish("Ram_D", toOut)
 
 }
-
-var ram IRam = &Ram{}
