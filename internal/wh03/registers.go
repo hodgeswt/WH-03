@@ -165,7 +165,7 @@ func AccRun(ctx context.Context, it *Register) {
 			logw.Infof("Register %s received OE update %08b", it.Name, dat)
 			it.Buffer("OE", dat)
 		case dat := <-we:
-			logw.Infof("Register %s received OE update %08b", it.Name, dat)
+			logw.Infof("Register %s received WE update %08b", it.Name, dat)
 			it.Buffer("WE", dat)
 		case dat := <-d:
 			it.Buffer("D", dat)

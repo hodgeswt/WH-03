@@ -2,8 +2,10 @@
     "clockFreq": 1,
     "ramK": 32,
     "logLevel": "ALL",
+    "logFile": "out.log",
     "romK": 32,
     "romFile": "rom.bin",
     "probeEnabled": true,
-    "stackStart": "8000"
+    "stackStart": "8000",
+    "stepsPerInstruction": 8
 }

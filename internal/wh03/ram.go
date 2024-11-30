@@ -38,7 +38,7 @@ func (it *Ram) Run(ctx context.Context) {
 	rst := Broker.Subscribe("RST")
 	memAdd := Broker.Subscribe("Mar_D")
 
-	it.data = []int{}
+	it.data = make([]int, it.Size)
 
 	for {
 		select {
@@ -69,7 +69,7 @@ func (it *Ram) Run(ctx context.Context) {
 func (it *Ram) Reset() {
 	logw.Debug("^$Ram.Reset()")
 	it.buffer = map[string]int{}
-	it.data = []int{}
+	it.data = make([]int, it.Size)
 }
 
 func (it *Ram) UpdateState() {
@@ -80,7 +80,7 @@ func (it *Ram) UpdateState() {
 		it.data[it.buffer["Mar_D"]] = it.buffer["D"]
 	}
 
-	toOut := it.data[it.buffer["MEM_ADD"]]
+	toOut := it.data[it.buffer["Mar_D"]]
 
 	if it.buffer["OE"] == 1 {
 		Broker.Publish("D", toOut)

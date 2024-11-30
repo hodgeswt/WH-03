@@ -32,8 +32,8 @@ type PubSub struct {
 }
 
 func (it *PubSub) Publish(topic string, msg int) error {
-	logw.Debugf("^PubSub.Publish - topic: %s, msg: %08b", topic, msg)
-	defer logw.Debugf("$PubSub.Publish")
+	logw.Debug("^PubSub.Publish")
+	defer logw.Debug("$PubSub.Publish")
 
 	if it.server != nil && !it.running {
 		panic(errors.New("Probe enabled but server not running"))
@@ -41,8 +41,6 @@ func (it *PubSub) Publish(topic string, msg int) error {
 
 	it.mu.RLock()
 	defer it.mu.RUnlock()
-	logw.Debug("PubSub.Publish - acquired mutex")
-	defer logw.Debug("PubSub.Publish - releasing mutex")
 
 	logw.Infof("PubSub.Publish - topic: %s, msg: %08b", topic, msg)
 
@@ -65,8 +63,6 @@ func (it *PubSub) Subscribe(topic string) <-chan int {
 
 	it.mu.Lock()
 	defer it.mu.Unlock()
-	logw.Debug("PubSub.Subscribe - acquired mutex")
-	defer logw.Debug("PubSub.Subscribe - releasing mutex")
 
 	sub := make(chan int, it.bufferSize)
 	it.submap[topic] = append(it.submap[topic], sub)
@@ -84,8 +80,6 @@ func (it *PubSub) Close() {
 
 	it.mu.Lock()
 	defer it.mu.Unlock()
-	logw.Debug("PubSub.Close - acquired mutex")
-	defer logw.Debug("PubSub.Close - releasing mutex")
 
 	it.closed = true
 	for _, topic := range it.submap {

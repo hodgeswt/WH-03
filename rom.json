@@ -1,0 +1,72 @@
+{
+    "sizeK": 32,
+    "romFile": "rom.bin",
+    "labelFile": "rom.lbl",
+    "stepsPerInstruction": 8,
+    "definitions": {
+        "hlt": "800",
+        "prgc_e": "400",
+        "nop": "0",
+        "a_oe": "10",
+        "b_oe": "11",
+        "c_oe": "12",
+        "o1_oe": "13",
+        "o2_oe": "14",
+        "acc_oe": "15",
+        "mar_oe": "1F",
+        "inst_oe": "1A",
+        "f_oe": "1B",
+        "ram_oe": "1C",
+        "prgc_oe": "1D",
+        "a_we": "200",
+        "b_we": "220",
+        "c_we": "260",
+        "o1_we": "280",
+        "o2_we": "2A0",
+        "acc_we": "2C0",
+        "mar_we": "2E0",
+        "inst_we": "300",
+        "f_we": "320",
+        "ram_we": "340",
+        "prgc_we": "360",
+        "reset_stepc": "800"
+    },
+    "base": [
+        "prgc_oe+mar_we",
+        "ram_oe+inst_we+prgc_e"
+    ],
+    "formulae": [
+        {
+            "inputs": [
+                "a",
+                "b",
+                "c",
+                "o1",
+                "o2"
+            ],
+            "formula": [
+                "@1_oe+@2_we"
+            ],
+            "name": "mov_@1_@2",
+            "exceptions": [
+                {
+                    "key": "@1",
+                    "when": [
+                        "a",
+                        "b"
+                    ],
+                    "formula": [
+                        "@1_oe+@2_we",
+                        "acc_we"
+                    ]
+                }
+            ]
+        }
+    ],
+    "instructions": [
+        {
+            "name": "hlt",
+            "steps": ["hlt"]
+        }
+    ]
+}

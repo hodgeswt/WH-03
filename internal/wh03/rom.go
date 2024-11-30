@@ -107,5 +107,5 @@ func (it *Rom) UpdateState() {
 
 	addr := (it.buffer["STPC"] << 8) | it.buffer["INST"]
 
-	Broker.Publish("ROM_D", addr)
+	Broker.Publish("Rom_D", addr)
 }

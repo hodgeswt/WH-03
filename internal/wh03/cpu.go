@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/hodgeswt/WH-03/internal/util"
 	"github.com/hodgeswt/utilw/pkg/logw"
 )
 
@@ -19,7 +20,7 @@ type CPU struct {
 	rom       IRom
 	ctrl      ICtrl
 	alu       IAlu
-    stack     IStack
+	stack     IStack
 	Cfg       *Config
 }
 
@@ -41,18 +42,18 @@ func (it *CPU) Setup() {
 	it.clock = &Clock{
 		Freq: it.Cfg.ClockFreq,
 	}
-	it.stepctr = &StepCounter{Limit: 8}
+	it.stepctr = &StepCounter{Limit: it.Cfg.StepsPerInstruction}
 	it.prgc = &ProgramCounter{}
-	it.ram = &Ram{Size: it.Cfg.RamK * (2 ^ 10)}
-	it.rom = &Rom{Size: it.Cfg.RomK * (2 ^ 10)}
+	it.ram = &Ram{Size: it.Cfg.RamK * util.IntPow(2, 10)}
+	it.rom = &Rom{Size: it.Cfg.RomK * util.IntPow(2, 10)}
 	it.ctrl = &Ctrl{}
 	it.alu = &Alu{}
 
-    size, err := strconv.ParseInt(it.Cfg.StackStart, 16, 64)
-    if err != nil {
-        panic(fmt.Sprintf("Invalid hex value provided for stack start: %s", it.Cfg.StackStart))
-    }
-    it.stack = &Stack{StackStart: int(size)}
+	size, err := strconv.ParseInt(it.Cfg.StackStart, 16, 64)
+	if err != nil {
+		panic(fmt.Sprintf("Invalid hex value provided for stack start: %s", it.Cfg.StackStart))
+	}
+	it.stack = &Stack{StackStart: int(size)}
 
 	err = it.rom.Load(it.Cfg.RomFile)
 
@@ -76,7 +77,7 @@ func (it *CPU) Run() {
 	go it.ram.Run(it.ctx)
 	go it.ctrl.Run(it.ctx)
 	go it.alu.Run(it.ctx)
-    go it.stack.Run(it.ctx)
+	go it.stack.Run(it.ctx)
 
 	for _, register := range it.registers {
 		go register.Run(it.ctx)
@@ -86,46 +87,11 @@ func (it *CPU) Run() {
 }
 
 func (it *CPU) run() {
-	clk := Broker.Subscribe("CLK")
-	d := []map[string]int{
-		{
-			"D":    1,
-			"A_WE": 1,
-		},
-		{
-			"D":    1,
-			"B_WE": 1,
-		},
-		{
-			"Alu_OP": 1,
-		},
-		{
-			"Accumulator_WE": 1,
-		},
-		{
-			"Accumulator_OE": 1,
-		},
-        {
-			"HLT": 1,
-		},
-	}
-	i := 0
 	for {
 		select {
 		case <-it.ctx.Done():
 			logw.Debug("wh03.run - context canceled")
 			return
-		case dat := <-clk:
-			logw.Errorf("CLK Dat: %d", dat)
-			if dat == 1 {
-				if i <= len(d)-1 {
-					inst := d[i]
-					i = i + 1
-					for k, v := range inst {
-						Broker.Publish(k, v)
-					}
-				}
-			}
 		}
 	}
 }

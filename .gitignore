@@ -1,0 +1,4 @@
+**/*.out
+**/*.log
+**/*.lbl
+**/testresults.json

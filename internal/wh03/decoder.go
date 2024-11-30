@@ -2,6 +2,9 @@ package wh03
 
 import (
 	"fmt"
+
+	"github.com/hodgeswt/WH-03/internal/util"
+	"github.com/hodgeswt/utilw/pkg/logw"
 )
 
 type IDecoder interface {
@@ -18,7 +21,8 @@ func (it *Decoder) Decode(data int, enable bool) {
 		panic("Uninitialized decoder attempted to decode data")
 	}
 
-	for i := 0; i < (2 ^ it.Bitwidth); i++ {
+    logw.Debugf("Decoder decoding: %04x", data)
+	for i := 0; i < util.IntPow(2, it.Bitwidth); i++ {
 		if it.Outputs[i] == "" {
 			panic(fmt.Sprintf("Decoder found data for invalid output: %d", i))
 		}

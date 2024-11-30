@@ -4,7 +4,6 @@
 package wh03
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,29 +12,29 @@ import (
 func TestStepCounterBuffer_NoBuffer(t *testing.T) {
     testStepCounter := &StepCounter{}
 
-    testStepCounter.Buffer("testKey", "testValue")
+    testStepCounter.Buffer("testKey", 1)
 
-    assert.Equal(t, testStepCounter.buffer["testKey"], "testValue")
+    assert.Equal(t, testStepCounter.buffer["testKey"], 1)
 }
 
 func TestStepCounterBuffer_BufferPopulated(t *testing.T) {
-    testStepCounter := &StepCounter{buffer: map[string]string{"testKey": "oldValue"}}
+    testStepCounter := &StepCounter{buffer: map[string]int{"testKey": 0}}
 
-    testStepCounter.Buffer("testKey", "testValue")
+    testStepCounter.Buffer("testKey", 1)
 
-    assert.Equal(t, testStepCounter.buffer["testKey"], "testValue")
+    assert.Equal(t, testStepCounter.buffer["testKey"], 1)
 }
 
 func TestStepCounterBuffer_BufferEmpty(t *testing.T) {
-    testStepCounter := &StepCounter{buffer: map[string]string{}}
+    testStepCounter := &StepCounter{buffer: map[string]int{}}
 
-    testStepCounter.Buffer("testKey", "testValue")
+    testStepCounter.Buffer("testKey", 1)
 
-    assert.Equal(t, testStepCounter.buffer["testKey"], "testValue")
+    assert.Equal(t, testStepCounter.buffer["testKey"], 1)
 }
 
 func TestStepCounterUpdateState_Initial0(t *testing.T) {
-    testStepCounter := &StepCounter{limit: 8}
+    testStepCounter := &StepCounter{Limit: 8}
 
     testStepCounter.UpdateState()
 
@@ -43,7 +42,7 @@ func TestStepCounterUpdateState_Initial0(t *testing.T) {
 }
 
 func TestStepCounterUpdateState_InitialAtLimit(t *testing.T) {
-    testStepCounter := &StepCounter{limit: 7, state: 7}
+    testStepCounter := &StepCounter{Limit: 7, state: 7}
 
     testStepCounter.UpdateState()
 

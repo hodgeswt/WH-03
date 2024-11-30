@@ -92,14 +92,15 @@ func (it *Ctrl) UpdateState() {
 	logw.Debug("^Ctrl.Run")
 	defer logw.Debug("^Ctrl.Run")
 
-    d := it.buffer["Rom_D"]
-    enableDecodeA := util.GetBit(d, 4) == 1
-    it.decodeA.Decode(d, enableDecodeA)
+	d := it.buffer["Rom_D"]
+	logw.Debugf("Ctrl.Run - Rom_D: %04x", d)
+	enableDecodeA := util.GetBit(d, 4) == 1
+	it.decodeA.Decode(d, enableDecodeA)
 
-    enableDecodeB := util.GetBit(d, 9) == 1
-    it.decodeB.Decode(d >> 5, enableDecodeB)
+	enableDecodeB := util.GetBit(d, 5) == 1
+	it.decodeB.Decode(d>>5, enableDecodeB)
 
-    Broker.Publish("PRGC_E", util.GetBit(d, 10))
-    Broker.Publish("HLT", util.GetBit(d, 11))
-
+	Broker.Publish("PRGC_E", util.GetBit(d, 10))
+	Broker.Publish("HLT", util.GetBit(d, 11))
+	Broker.Publish("STPC_RST", util.GetBit(d, 12))
 }

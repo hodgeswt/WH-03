@@ -8,30 +8,34 @@ import (
 )
 
 type Clock struct {
-	Freq  int
-	state int
-	halt  bool
+	Freq     int
+	state    int
+	halt     bool
+	testMode bool
 }
 
 func (it *Clock) Run(ctx context.Context) {
 	freq := time.Duration(it.Freq)
 	it.state = 0
-	it.halt = false
+
+	if !it.testMode {
+		it.halt = false
+	}
 
 	hlt := Broker.Subscribe("HLT")
+
 	for {
 		select {
 		case <-ctx.Done():
 			logw.Debugf("Clock.Run - context cancelled")
 			return
 		case dat := <-hlt:
-            logw.Debugf("Clock.Run - received HLT %d", dat)
+			logw.Debugf("Clock.Run - received HLT %d", dat)
 			it.halt = dat == 1
 		case <-time.After(freq * time.Second):
 			if !it.halt {
 				Broker.Publish("CLK", it.state)
 				toggle(&it.state)
-
 			}
 		}
 	}
